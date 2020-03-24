@@ -11,4 +11,20 @@ RSpec.describe Forspell::Sanitizer do
       specify { is_expected.to eq("example with tags") }
     end
   end
+
+  describe '#preprocess_ruby' do
+    subject { described_class.preprocess_ruby(input) }
+
+    context 'splitting snake case' do
+      let(:input) { 'availability_mailer' }
+
+      specify { is_expected.to eq('availability mailer') }
+    end
+
+    context 'splitting on full stop' do
+      let(:input) { 'mailer.subject' }
+
+      specify { is_expected.to eq('mailer subject') }
+    end
+  end
 end

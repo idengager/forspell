@@ -8,7 +8,8 @@ require_relative 'source'
 module Forspell::Loaders
   class Ruby < Source
     MAX_COMMENT_LENGTH = 777
-    
+    ALLOWED_TYPES = %w(comment tstring_content)
+
     def initialize(file: nil, text: nil)
       super
       @markup = RDoc::Markup.new
@@ -20,12 +21,12 @@ module Forspell::Loaders
 
     def comments
       YARD::Parser::Ruby::RubyParser.new(@input, @file).parse
-        .tokens.select{ |type,| type == :comment }
-        .reject{ |_, text,| text.start_with?('#  ') }
+        .tokens.select { |type,| ALLOWED_TYPES.include? type.to_s }
+        .reject { |_, text,| text.start_with?('#  ') }
     end
 
     def text(comment)
-      @markup.convert(comment[1], @formatter)
+      @markup.convert(Forspell::Sanitizer.preprocess_ruby(comment[1]), @formatter)
     end
 
     def line(comment)
